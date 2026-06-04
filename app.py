@@ -11,6 +11,8 @@ db = SQLAlchemy(app)
 login_manager = LoginManager()
 login_manager.login_view = 'login'
 login_manager.init_app(app)
+with app.app_context():
+    db.create_all()
 
 # ==================== DATABASE MODELS ====================
 class User(UserMixin, db.Model):
@@ -215,4 +217,7 @@ if __name__ == '__main__':
             db.session.add(admin_default)
             db.session.commit()
             
-    app.run(debug=True)
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
+    
