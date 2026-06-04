@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - XXI Online</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #121212; color: #e0e0e0; }
+        .card { background-color: #1e1e1e; border: 1px solid #2d2d2d; color: #fff; }
+        .table { color: #e0e0e0; }
+        .navbar { background-color: #1a1a1a !important; border-bottom: 2px solid #ffc107; }
+        
+        /* ISI KOLOM INPUT (Warna Teks Saat Diketik) */
+        .form-control { background-color: #2b2b2b !important; color: #ffffff !important; border-color: #444; }
+        .form-control:focus { background-color: #2b2b2b !important; color: #ffffff !important; box-shadow: 0 0 0 0.25rem rgba(255, 193, 7, 0.25); }
+        
+        /* TULISAN PETUNJUK DI ATAS FORM (Kita ubah jadi putih terang biar jelas) */
+        label.form-label-custom { color: #ffffff !important; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-warning" href="#">🎬 CINEPLEX ADMIN PANEL</a>
+            <a href="/logout" class="btn btn-outline-danger btn-sm fw-bold">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card p-3 shadow">
+                    <h5 class="text-warning mb-3">➕ Tambah Film Baru</h5>
+                    <form action="/admin/tambah" method="POST">
+                        <div class="mb-2">
+                            <label class="form-label-custom small">Judul Film</label>
+                            <input type="text" name="judul" class="form-control form-control-sm" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label-custom small">Genre</label>
+                            <input type="text" name="genre" class="form-control form-control-sm" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label-custom small">Harga Tiket (Rp)</label>
+                            <input type="number" name="harga" class="form-control form-control-sm" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label-custom small">Link URL Poster Film</label>
+                            <input type="text" name="poster" class="form-control form-control-sm" placeholder="https://link-gambar.com/foto.jpg">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label-custom small">Sinopsis</label>
+                            <textarea name="sinopsis" class="form-control form-control-sm" rows="2" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-warning btn-sm w-100 fw-bold text-dark">Simpan Film</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card p-3 shadow">
+                    <h5 class="text-warning mb-3">🍿 Daftar Film Tersedia</h5>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover align-middle">
+                            <thead>
+                                <tr class="text-muted small border-secondary">
+                                    <th>POSTER</th>
+                                    <th>JUDUL FILM</th>
+                                    <th>GENRE</th>
+                                    <th>HARGA</th>
+                                    <th class="text-center">AKSI</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if films %}
+                                    {% for film in films %}
+                                    <tr class="border-secondary">
+                                        <td><img src="{{ film.poster }}" alt="Poster" style="width: 50px; height: 70px; object-fit: cover; border-radius: 4px;"></td>
+                                        <td><strong class="text-white">{{ film.judul }}</strong></td>
+                                        <td><span class="badge bg-secondary">{{ film.genre }}</span></td>
+                                        <td class="text-success fw-bold">Rp {{ film.harga }}</td>
+                                        <td class="text-center">
+                                            <a href="/admin/hapus/{{ film.id }}" class="btn btn-danger btn-sm" onclick="return confirm('Hapus film?')">Hapus</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr><td colspan="5" class="text-center text-muted py-4 small">Belum ada film.</td></tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

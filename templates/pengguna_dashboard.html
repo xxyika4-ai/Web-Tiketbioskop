@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Pengguna - XXI Online</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #121212; color: #e0e0e0; }
+        .card { background-color: #1e1e1e; border: 1px solid #2d2d2d; color: #fff; }
+        .navbar { background-color: #1a1a1a !important; border-bottom: 2px solid #ffc107; }
+        .modal-content { background-color: #1e1e1e; color: #fff; border: 1px solid #ffc107; }
+        .form-label { color: #ffffff !important; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark px-4">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold text-warning" href="#">🎬 XXI ONLINE DASHBOARD</a>
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-white">Selamat Datang, <strong class="text-warning">{{ current_user.username }}</strong></span>
+                <a href="/logout" class="btn btn-outline-danger btn-sm fw-bold">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <h2 class="fw-bold text-warning mb-4">🍿 Sedang Tayang di Bioskop</h2>
+        
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% if films %}
+                {% for film in films %}
+                <div class="col">
+                    <div class="card shadow p-3 h-100 d-flex flex-column justify-content-betweeb">
+                        {% if film.poster %}
+                            <img src="{{ film.poster }}" class="card-img-top rounded mb-3" alt="Poster" style="height: 400px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-dark text-muted d-flex justify-content-center align-items-center rounded mb-3" style="height: 400px;">
+                                <span>No Poster Image</span>
+                            </div>
+                        {% endif %}
+                        <div class="card-body p-0">
+                            <h4 class="fw-bold text-warning mb-1">{{ film.judul }}</h4>
+                            <span class="badge bg-warning text-dark mb-3 fw-bold">{{ film.genre }}</span>
+                            <p class="text-light small mb-3">{{ film.sinopsis }}</p>
+                            
+                            <hr class="border-secondary">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-white small fw-bold">Harga Tiket:</span>
+                                <h5 class="text-success fw-bold m-0">Rp {{ film.harga }}</h5>
+                            </div>
+                            <button class="btn btn-warning w-100 fw-bold text-dark py-2" data-bs-toggle="modal" data-bs-target="#modalBeli{{ film.id }}">
+                                🎟️ Beli Tiket
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="modalBeli{{ film.id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header border-secondary">
+                                <h5 class="modal-title fw-bold text-warning">🎟️ Pemesanan Tiket</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form action="/booking/{{ film.id }}" method="POST">
+                                <div class="modal-body">
+                                    <div class="text-center mb-4">
+                                        <h3 class="fw-bold text-white m-0">{{ film.judul }}</h3>
+                                        <span class="text-warning fw-bold">Rp {{ film.harga }} / Tiket</span>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label small">Jumlah Tiket :</label>
+                                        <input type="number" name="jumlah_tiket" class="form-control bg-dark text-white border-secondary" min="1" max="10" value="1" required>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label small">Pilih Jam Tayang :</label>
+                                        <select name="jam_tayang" class="form-select bg-dark text-white border-secondary" required>
+                                            <option value="13:00 WIB">🕐 13:00 WIB</option>
+                                            <option value="16:15 WIB">🕒 16:15 WIB</option>
+                                            <option value="19:30 WIB">🕖 19:30 WIB</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label small d-block">Pilih Kursi Bioskop :</label>
+                                        <div class="text-center w-100 bg-secondary text-dark fw-bold small py-1 mb-2 rounded" style="font-size: 11px;">
+                                            LAYAR BIOSKOP / SCREEN
+                                        </div>
+                                        <div class="d-flex flex-column gap-2 p-3 rounded bg-dark border border-secondary justify-content-center align-items-center">
+                                            {% for baris in ['A', 'B', 'C'] %}
+                                            <div class="d-flex gap-2">
+                                                {% for no in ['1', '2', '3', '4', '5'] %}
+                                                    {% set nama_kursi = baris ~ no %}
+                                                    {% if nama_kursi in kursi_terpesan %}
+                                                        <button type="button" class="btn btn-danger btn-sm fw-bold d-flex justify-content-center align-items-center" style="width: 38px; height: 38px; font-size: 11px;" disabled>X</button>
+                                                    {% else %}
+                                                        <button type="button" class="btn btn-outline-warning btn-sm fw-bold seat-btn d-flex justify-content-center align-items-center" style="width: 38px; height: 38px; font-size: 11px;" onclick="pilihKursi('{{ nama_kursi }}', this, '{{ film.id }}')">
+                                                            {{ nama_kursi }}
+                                                        </button>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                        <input type="hidden" name="nomor_kursi" id="input_nomor_kursi{{ film.id }}" required>
+                                        <div class="mt-2 small text-muted text-center">
+                                            Kursi Terpilih: <span id="info_kursi{{ film.id }}" class="fw-bold text-warning">Belum memilih</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label small">Metode Pembayaran :</label>
+                                        <select name="metode_bayar" class="form-select bg-dark text-white border-secondary" required>
+                                            <option value="DANA">💰 DANA</option>
+                                            <option value="OVO">📱 OVO</option>
+                                            <option value="GOPAY">💸 GOPAY</option>
+                                            <option value="ShopeePay">🛍️ ShopeePay</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="modal-footer border-secondary">
+                                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+                                    <button type="submit" class="btn btn-warning text-dark fw-bold btn-sm">Bayar Sekarang</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">Belum ada film yang didaftarkan oleh admin.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+    function pilihKursi(nomorKursi, elemenTombol, filmId) {
+        document.getElementById('input_nomor_kursi' + filmId).value = nomorKursi;
+        document.getElementById('info_kursi' + filmId).innerText = nomorKursi;
+        
+        let modalBody = elemenTombol.closest('.modal-body');
+        let semuaTombol = modalBody.querySelectorAll('.seat-btn');
+        
+        semuaTombol.forEach(btn => {
+            btn.classList.remove('btn-warning', 'text-dark');
+            btn.classList.add('btn-outline-warning');
+        });
+        
+        elemenTombol.classList.remove('btn-outline-warning');
+        elemenTombol.classList.add('btn-warning', 'text-dark');
+    }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
